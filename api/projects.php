@@ -156,7 +156,7 @@ function updateProject($db) {
     $fields = [];
     $params = [];
     
-    $updatable = ['title', 'description', 'cover_mode', 'page_width', 'page_height', 'bg_color', 'auto_flip', 'auto_flip_interval', 'sound_enabled', 'status'];
+    $updatable = ['title', 'description', 'cover_mode', 'page_width', 'page_height', 'bg_color', 'auto_flip', 'auto_flip_interval', 'sound_enabled', 'sound_type', 'status'];
     
     foreach ($updatable as $field) {
         if (isset($data[$field])) {

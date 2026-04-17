@@ -88,6 +88,7 @@ $flipbookData = [
     'pageHeight' => (int) $project['page_height'],
     'bgColor' => $project['bg_color'],
     'soundEnabled' => (bool) $project['sound_enabled'],
+    'soundType' => $project['sound_type'] ?? 'flip1',
     'autoFlip' => (bool) $project['auto_flip'],
     'autoFlipInterval' => (int) $project['auto_flip_interval'],
     'pages' => $pageList,

@@ -33,7 +33,7 @@
         document.body.style.backgroundColor = flipbookData.bgColor || '#1a1a2e';
 
         // Init sound
-        FlipBookSounds.init();
+        FlipBookSounds.init(flipbookData.soundType || 'flip1');
         if (!flipbookData.soundEnabled) {
             FlipBookSounds.setEnabled(false);
             updateSoundButton();
@@ -446,11 +446,13 @@
 
     // Handle first user interaction for audio context
     document.addEventListener('click', () => {
-        FlipBookSounds.init();
+        const sd = window.FLIPBOOK_DATA;
+        FlipBookSounds.init(sd && sd.soundType || 'flip1');
     }, { once: true });
 
     document.addEventListener('touchstart', () => {
-        FlipBookSounds.init();
+        const sd = window.FLIPBOOK_DATA;
+        FlipBookSounds.init(sd && sd.soundType || 'flip1');
     }, { once: true });
 
 })();

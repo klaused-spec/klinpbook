@@ -416,7 +416,17 @@ const App = (() => {
         $('#settings-bg-color').value = currentProject.bg_color;
         $('#settings-bg-color-text').value = currentProject.bg_color;
         $('#settings-sound').value = currentProject.sound_enabled ? '1' : '0';
+        $('#settings-sound-type').value = currentProject.sound_type || 'flip1';
+        toggleSoundTypeVisibility();
         $('#modal-settings').classList.add('active');
+    }
+
+    function toggleSoundTypeVisibility() {
+        const soundEnabled = $('#settings-sound').value === '1';
+        const group = $('#sound-type-group');
+        if (group) {
+            group.style.display = soundEnabled ? '' : 'none';
+        }
     }
 
     async function saveSettings() {
@@ -431,7 +441,8 @@ const App = (() => {
                     description: $('#settings-description').value.trim(),
                     cover_mode: $('#settings-cover-mode').value,
                     bg_color: $('#settings-bg-color').value,
-                    sound_enabled: parseInt($('#settings-sound').value)
+                    sound_enabled: parseInt($('#settings-sound').value),
+                    sound_type: $('#settings-sound-type').value
                 })
             });
 
@@ -491,6 +502,16 @@ const App = (() => {
         $('#btn-save-settings').addEventListener('click', saveSettings);
         $('#btn-cancel-settings').addEventListener('click', () => $('#modal-settings').classList.remove('active'));
         $('#modal-close-settings').addEventListener('click', () => $('#modal-settings').classList.remove('active'));
+
+        // Sound type toggle visibility
+        $('#settings-sound').addEventListener('change', toggleSoundTypeVisibility);
+
+        // Preview sound button
+        $('#btn-preview-sound').addEventListener('click', async () => {
+            const soundType = $('#settings-sound-type').value;
+            await FlipBookSounds.init(soundType);
+            FlipBookSounds.play();
+        });
 
         // Color sync
         $('#project-bg-color').addEventListener('input', (e) => {

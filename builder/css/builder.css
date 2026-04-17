@@ -668,6 +668,20 @@ a:hover { text-decoration: underline; }
     border-radius: 4px;
 }
 
+.form-sound-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-sound-row .form-select {
+    flex: 1;
+}
+
+.form-sound-row .btn {
+    flex-shrink: 0;
+}
+
 /* ── Editor Tabs ── */
 .editor-tabs {
     display: flex;
