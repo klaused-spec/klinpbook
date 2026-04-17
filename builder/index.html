@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlipBook Builder</title>
+    <meta name="description" content="Crie flipbooks interativos a partir de livros digitalizados">
+    <link rel="stylesheet" href="css/builder.css">
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="emoji">📖</span> FlipBook Builder
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                    <span class="icon">📚</span> Meus Flipbooks
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                FlipBook Builder v1.0
+            </div>
+        </aside>
+
+        <!-- Sidebar overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <main class="main" id="main">
+            <!-- Dashboard View -->
+            <div id="view-dashboard">
+                <div class="main-header">
+                    <div style="display:flex;align-items:center;gap:0.75rem">
+                        <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                        <h1 class="main-title" id="main-title">Meus Flipbooks</h1>
+                    </div>
+                    <button class="btn btn-primary" id="btn-new-project">
+                        <span>+</span> Novo Flipbook
+                    </button>
+                </div>
+                <div class="main-content">
+                    <div class="projects-grid" id="projects-grid">
+                        <!-- Projects will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor View -->
+            <div id="view-editor" style="display:none">
+                <div class="main-header">
+                    <div style="display:flex;align-items:center;gap:0.75rem">
+                        <button class="back-btn" id="btn-back">← Voltar</button>
+                        <h1 class="main-title" id="editor-title">Editando...</h1>
+                    </div>
+                    <div style="display:flex;gap:0.75rem">
+                        <button class="btn btn-secondary" id="btn-settings">⚙ Configurações</button>
+                        <button class="btn btn-success" id="btn-publish">🚀 Publicar</button>
+                        <button class="btn btn-secondary" id="btn-export">📦 Exportar ZIP</button>
+                    </div>
+                </div>
+
+                <!-- Editor Tabs -->
+                <div class="editor-tabs">
+                    <button class="editor-tab active" data-tab="pages">📄 Páginas</button>
+                    <button class="editor-tab" data-tab="hotspots">✨ Interações</button>
+                    <button class="editor-tab" data-tab="preview">👁 Preview</button>
+                </div>
+
+                <!-- Pages Panel -->
+                <div class="editor-panel active" id="panel-pages">
+                    <div class="upload-area" id="upload-area">
+                        <span class="upload-icon">📤</span>
+                        <div class="upload-text">Arraste imagens aqui ou clique para selecionar</div>
+                        <div class="upload-hint">JPG, PNG ou WebP • Máx. 20MB cada</div>
+                        <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none">
+                        <div class="upload-progress" id="upload-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-header">
+                        <div class="section-title">
+                            Páginas <span class="section-count" id="page-count">0</span>
+                        </div>
+                        <div style="display:flex;gap:0.5rem">
+                            <button class="btn btn-sm btn-secondary" id="btn-select-all">Selecionar todas</button>
+                            <button class="btn btn-sm btn-danger" id="btn-delete-selected" style="display:none">🗑 Excluir selecionadas</button>
+                        </div>
+                    </div>
+                    
+                    <div class="pages-grid" id="pages-grid">
+                        <!-- Page thumbnails will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Hotspots Panel -->
+                <div class="editor-panel" id="panel-hotspots">
+                    <div class="hotspot-editor">
+                        <div class="hotspot-canvas-wrapper">
+                            <div class="hotspot-page-nav">
+                                <button class="btn btn-sm btn-secondary" id="hs-prev">◀ Anterior</button>
+                                <span id="hs-page-indicator">Página 1</span>
+                                <button class="btn btn-sm btn-secondary" id="hs-next">Próxima ▶</button>
+                            </div>
+                            <div class="hotspot-canvas" id="hotspot-canvas">
+                                <img id="hotspot-page-image" src="" alt="Page">
+                            </div>
+                        </div>
+                        <div class="hotspot-sidebar">
+                            <div class="section-header">
+                                <div class="section-title">Hotspots</div>
+                                <button class="btn btn-sm btn-primary" id="btn-add-hotspot">+ Adicionar</button>
+                            </div>
+                            <div id="hotspot-list">
+                                <!-- Hotspots will be listed here -->
+                            </div>
+                            <div id="hotspot-form" style="display:none">
+                                <h4 style="margin-bottom:1rem">Editar Hotspot</h4>
+                                <div class="form-group">
+                                    <label class="form-label">Nome</label>
+                                    <input class="form-input" id="hs-label" placeholder="Ex: Saiba mais">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tipo de Ação</label>
+                                    <select class="form-select" id="hs-action-type">
+                                        <option value="popup">Popup (texto/imagem)</option>
+                                        <option value="link">Link externo</option>
+                                        <option value="zoom">Zoom na região</option>
+                                        <option value="animation">Animação</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="hs-popup-fields">
+                                    <label class="form-label">Título do Popup</label>
+                                    <input class="form-input" id="hs-popup-title" placeholder="Título">
+                                    <label class="form-label" style="margin-top:0.75rem">Conteúdo</label>
+                                    <textarea class="form-textarea" id="hs-popup-content" placeholder="Texto do popup..."></textarea>
+                                </div>
+                                <div class="form-group" id="hs-link-fields" style="display:none">
+                                    <label class="form-label">URL</label>
+                                    <input class="form-input" id="hs-link-url" placeholder="https://...">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Animação</label>
+                                    <select class="form-select" id="hs-animation">
+                                        <option value="pulse">Pulse</option>
+                                        <option value="glow">Glow</option>
+                                        <option value="bounce">Bounce</option>
+                                        <option value="shake">Shake</option>
+                                        <option value="fadeIn">Fade In</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Tooltip</label>
+                                    <input class="form-input" id="hs-tooltip" placeholder="Texto ao passar o mouse">
+                                </div>
+                                <div style="display:flex;gap:0.5rem;margin-top:1rem">
+                                    <button class="btn btn-sm btn-primary" id="btn-save-hotspot">Salvar</button>
+                                    <button class="btn btn-sm btn-secondary" id="btn-cancel-hotspot">Cancelar</button>
+                                    <button class="btn btn-sm btn-danger" id="btn-delete-hotspot">Excluir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="editor-panel" id="panel-preview">
+                    <div class="preview-container" id="preview-container">
+                        <!-- Preview StPageFlip will be here -->
+                    </div>
+                    <div class="preview-controls">
+                        <button class="btn btn-secondary" id="preview-prev">◀ Anterior</button>
+                        <span id="preview-page-indicator">1 / 1</span>
+                        <button class="btn btn-secondary" id="preview-next">Próxima ▶</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- New Project Modal -->
+    <div class="modal-overlay" id="modal-new-project">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Novo Flipbook</h2>
+                <button class="modal-close" id="modal-close-new">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Título *</label>
+                    <input class="form-input" id="project-title" placeholder="Ex: Meu Livro Digital" autofocus>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea class="form-textarea" id="project-description" placeholder="Breve descrição do flipbook..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo de Capa</label>
+                    <select class="form-select" id="project-cover-mode">
+                        <option value="hardcover">Capa dura (hard)</option>
+                        <option value="softcover">Capa mole (soft)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cor de Fundo</label>
+                    <div class="form-color-row">
+                        <input type="color" class="form-color" id="project-bg-color" value="#1a1a2e">
+                        <input class="form-input" id="project-bg-color-text" value="#1a1a2e" style="max-width:120px">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-new">Cancelar</button>
+                <button class="btn btn-primary" id="btn-create-project">Criar Flipbook</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Configurações do Flipbook</h2>
+                <button class="modal-close" id="modal-close-settings">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Título</label>
+                    <input class="form-input" id="settings-title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea class="form-textarea" id="settings-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo de Capa</label>
+                    <select class="form-select" id="settings-cover-mode">
+                        <option value="hardcover">Capa dura (hard)</option>
+                        <option value="softcover">Capa mole (soft)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cor de Fundo</label>
+                    <div class="form-color-row">
+                        <input type="color" class="form-color" id="settings-bg-color" value="#1a1a2e">
+                        <input class="form-input" id="settings-bg-color-text" value="#1a1a2e" style="max-width:120px">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Som de virar página</label>
+                    <select class="form-select" id="settings-sound">
+                        <option value="1">Ativado</option>
+                        <option value="0">Desativado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-settings">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save-settings">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" id="modal-confirm">
+        <div class="modal" style="max-width:400px">
+            <div class="modal-header">
+                <h2 class="modal-title" id="confirm-title">Confirmar</h2>
+                <button class="modal-close" id="modal-close-confirm">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Tem certeza que deseja excluir?</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" id="btn-confirm-cancel">Cancelar</button>
+                    <button class="btn btn-danger" id="btn-confirm-ok">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+    <script src="../viewer/js/page-flip.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/uploader.js"></script>
+    <script src="js/page-manager.js"></script>
+    <script src="js/hotspot-editor.js"></script>
+    <script src="js/preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+RewriteEngine On
+
+# Security: Deny access to sensitive files
+<FilesMatch "\.(sql|md|json)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Allow manifest.json in viewer/published directories
+<FilesMatch "manifest\.json$">
+    <If "%{REQUEST_URI} =~ m#/(viewer|published)/#">
+        Order Allow,Deny
+        Allow from all
+    </If>
+</FilesMatch>
+
+# Protect uploads directory listing
+Options -Indexes
+
+# CORS headers for API
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# Gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>

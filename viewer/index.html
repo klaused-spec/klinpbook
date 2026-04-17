@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="description" content="Digital FlipBook - Interactive book viewer">
+    <title>{{TITLE}}</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/viewer.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-logo">📖 FlipBook</div>
+        <div class="loading-book-animation">
+            <div class="page"></div>
+            <div class="page"></div>
+            <div class="page"></div>
+        </div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+        <div class="loading-text">Carregando páginas...</div>
+    </div>
+
+    <!-- Viewer -->
+    <div class="viewer" id="viewer">
+        <!-- Top Bar -->
+        <div class="top-bar" id="top-bar">
+            <div class="book-title" id="book-title">{{TITLE}}</div>
+            <div class="top-actions">
+                <button class="ctrl-btn" id="btn-sound" title="Som (M)" aria-label="Toggle sound">
+                    <span class="icon">🔊</span>
+                </button>
+                <button class="ctrl-btn" id="btn-fullscreen" title="Tela cheia (F)" aria-label="Toggle fullscreen">
+                    <span class="icon">⛶</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Flipbook -->
+        <div class="flipbook-wrapper">
+            <div class="flipbook-container" id="flipbook-container"></div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="controls" id="controls">
+            <button class="ctrl-btn" id="btn-prev" title="Página anterior (←)" aria-label="Previous page">
+                <span class="icon">◀</span>
+            </button>
+
+            <div class="page-slider-container">
+                <input type="range" class="page-slider" id="page-slider" min="0" max="1" value="0" aria-label="Page slider">
+                <span class="page-indicator" id="page-indicator">1 / 1</span>
+            </div>
+
+            <button class="ctrl-btn" id="btn-next" title="Próxima página (→)" aria-label="Next page">
+                <span class="icon">▶</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Flipbook Data (injected by publish.php) -->
+    <!-- FLIPBOOK_DATA -->
+
+    <script src="./js/page-flip.min.js"></script>
+    <script src="./js/sounds.js"></script>
+    <script src="./js/viewer.js"></script>
+</body>
+</html>

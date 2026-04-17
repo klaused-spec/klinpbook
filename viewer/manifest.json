@@ -1,0 +1,22 @@
+{
+    "name": "FlipBook Viewer",
+    "short_name": "FlipBook",
+    "description": "Interactive Digital FlipBook",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#0f0f1a",
+    "theme_color": "#6c5ce7",
+    "icons": [
+        {
+            "src": "pages/page_0000.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "pages/page_0000.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg"
+        }
+    ]
+}
