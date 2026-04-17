@@ -28,6 +28,13 @@ const App = (() => {
 
         try {
             const response = await fetch(url, config);
+
+            // Session expired — kick to login
+            if (response.status === 401) {
+                showLogin();
+                throw new Error('Sessão expirada. Faça login novamente.');
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -95,6 +102,76 @@ const App = (() => {
             $('#btn-confirm-cancel').addEventListener('click', onCancel);
             $('#modal-close-confirm').addEventListener('click', onCancel);
         });
+    }
+
+    // ── Auth ──
+    async function checkAuth() {
+        try {
+            const res = await fetch(`${API_BASE}/auth.php?action=status`);
+            const data = await res.json();
+            return data.logged_in === true;
+        } catch {
+            return false;
+        }
+    }
+
+    async function login() {
+        const password = $('#login-password').value;
+        const errorEl = $('#login-error');
+        const btn = $('#btn-login');
+
+        if (!password) {
+            errorEl.textContent = 'Digite a senha';
+            errorEl.style.display = '';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="login-spinner"></span> Entrando...';
+        errorEl.style.display = 'none';
+
+        try {
+            const res = await fetch(`${API_BASE}/auth.php?action=login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showApp();
+            } else {
+                errorEl.textContent = data.error || 'Senha incorreta';
+                errorEl.style.display = '';
+            }
+        } catch (err) {
+            errorEl.textContent = 'Erro de conexão';
+            errorEl.style.display = '';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Entrar';
+        }
+    }
+
+    async function logout() {
+        try {
+            await fetch(`${API_BASE}/auth.php?action=logout`, { method: 'POST' });
+        } catch { /* ignore */ }
+        showLogin();
+    }
+
+    function showLogin() {
+        $('#view-login').style.display = '';
+        $('#app').style.display = 'none';
+        $('#login-password').value = '';
+        $('#login-error').style.display = 'none';
+        setTimeout(() => $('#login-password').focus(), 100);
+    }
+
+    function showApp() {
+        $('#view-login').style.display = 'none';
+        $('#app').style.display = '';
+        showView('dashboard');
     }
 
     // ── Views ──
@@ -376,6 +453,15 @@ const App = (() => {
 
     // ── Event Bindings ──
     function bindEvents() {
+        // Login
+        $('#btn-login').addEventListener('click', login);
+        $('#login-password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        // Logout
+        $('#btn-logout').addEventListener('click', logout);
+
         // Navigation
         $('#nav-dashboard').addEventListener('click', () => showView('dashboard'));
         $('#btn-back').addEventListener('click', () => showView('dashboard'));
@@ -443,9 +529,16 @@ const App = (() => {
     }
 
     // ── Init ──
-    function init() {
+    async function init() {
         bindEvents();
-        showView('dashboard');
+
+        // Check if already logged in
+        const isLoggedIn = await checkAuth();
+        if (isLoggedIn) {
+            showApp();
+        } else {
+            showLogin();
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);

@@ -171,3 +171,16 @@ function processImage($sourcePath, $destPath, $maxWidth = MAX_PAGE_WIDTH, $quali
 function createThumbnail($sourcePath, $thumbPath) {
     return processImage($sourcePath, $thumbPath, THUMB_WIDTH, 75);
 }
+
+/**
+ * Helper: Require authentication (session-based)
+ * Call at the top of any protected API endpoint
+ */
+function requireAuth() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (empty($_SESSION['logged_in'])) {
+        jsonResponse(['error' => 'Unauthorized'], 401);
+    }
+}

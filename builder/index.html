@@ -8,7 +8,24 @@
     <link rel="stylesheet" href="css/builder.css">
 </head>
 <body>
-    <div class="app" id="app">
+    <!-- Login Screen -->
+    <div class="login-view" id="view-login">
+        <div class="login-card">
+            <div class="login-logo">
+                <span class="emoji">📖</span> FlipBook Builder
+            </div>
+            <p class="login-subtitle">Insira a senha de administrador para continuar</p>
+            <div class="form-group">
+                <input type="password" class="form-input login-input" id="login-password" placeholder="Senha" autocomplete="current-password">
+            </div>
+            <div class="login-error" id="login-error" style="display:none"></div>
+            <button class="btn btn-primary btn-lg login-btn" id="btn-login">
+                Entrar
+            </button>
+        </div>
+    </div>
+
+    <div class="app" id="app" style="display:none">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -22,6 +39,7 @@
                 </button>
             </nav>
             <div class="sidebar-footer">
+                <button class="btn btn-sm btn-secondary" id="btn-logout" style="width:100%;margin-bottom:0.5rem">🚪 Sair</button>
                 FlipBook Builder v1.0
             </div>
         </aside>

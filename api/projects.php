@@ -10,6 +10,7 @@
  */
 
 require_once __DIR__ . '/db.php';
+requireAuth();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $db = Database::getInstance();
