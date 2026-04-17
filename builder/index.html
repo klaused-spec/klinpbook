@@ -93,8 +93,8 @@
                     <div class="upload-area" id="upload-area">
                         <span class="upload-icon">📤</span>
                         <div class="upload-text">Arraste imagens aqui ou clique para selecionar</div>
-                        <div class="upload-hint">JPG, PNG ou WebP • Máx. 20MB cada</div>
-                        <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none">
+                        <div class="upload-hint">JPG, PNG, WebP ou PDF • Máx. 20MB cada</div>
+                        <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none">
                         <div class="upload-progress" id="upload-progress">
                             <div class="progress-bar">
                                 <div class="progress-fill" id="progress-fill"></div>
@@ -307,6 +307,7 @@
 
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="../viewer/js/page-flip.min.js"></script>
     
     <!-- App Scripts -->

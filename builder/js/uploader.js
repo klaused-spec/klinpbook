@@ -9,24 +9,27 @@ const Uploader = (() => {
     const $ = (sel) => document.querySelector(sel);
 
     function init() {
+        // Configure PDF.js worker
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
         const area = $('#upload-area');
         const input = $('#file-input');
         if (!area || !input) return;
 
-        // Click to upload
+        // ... (rest of init)
         area.addEventListener('click', (e) => {
             if (e.target !== input) input.click();
         });
 
-        // File selected
         input.addEventListener('change', () => {
             if (input.files.length > 0) {
                 uploadFiles(input.files);
-                input.value = ''; // Reset
+                input.value = '';
             }
         });
 
-        // Drag and drop
         area.addEventListener('dragover', (e) => {
             e.preventDefault();
             area.classList.add('dragover');
@@ -54,34 +57,46 @@ const Uploader = (() => {
             return;
         }
 
-        // Filter valid images
-        const validFiles = [];
-        for (const file of files) {
-            if (['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                validFiles.push(file);
-            }
-        }
-
-        if (validFiles.length === 0) {
-            App.toast('Nenhuma imagem válida selecionada', 'warning');
-            return;
-        }
-
-        // Show progress
         const progressBar = $('#upload-progress');
         const progressFill = $('#progress-fill');
-        progressBar.classList.add('active');
-        progressFill.style.width = '0%';
+        const uploadText = $('.upload-text');
+        const originalText = uploadText.innerHTML;
 
-        const formData = new FormData();
-        formData.append('project_id', project.id);
-
-        validFiles.forEach((file) => {
-            formData.append('pages[]', file);
-        });
-
+        const filesToUpload = [];
+        
         try {
-            // Use XMLHttpRequest for progress tracking
+            // Processing phase
+            for (const file of files) {
+                if (['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                    filesToUpload.push(file);
+                } else if (file.type === 'application/pdf') {
+                    progressBar.classList.add('active');
+                    uploadText.innerHTML = `🧬 Processando PDF: ${file.name}...`;
+                    
+                    const pdfPages = await convertPdfToImages(file);
+                    filesToUpload.push(...pdfPages);
+                }
+            }
+
+            if (filesToUpload.length === 0) {
+                App.toast('Nenhum arquivo válido selecionada (JPG, PNG, WebP ou PDF)', 'warning');
+                return;
+            }
+
+            // Upload phase
+            uploadText.innerHTML = `🚀 Enviando ${filesToUpload.length} página(s)...`;
+            progressBar.classList.add('active');
+            progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('project_id', project.id);
+
+            filesToUpload.forEach((file, index) => {
+                // Ensure name for blobs
+                const fileName = file.name || `page-${index + 1}.jpg`;
+                formData.append('pages[]', file, fileName);
+            });
+
             await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
 
@@ -94,8 +109,7 @@ const Uploader = (() => {
 
                 xhr.addEventListener('load', () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        const result = JSON.parse(xhr.responseText);
-                        resolve(result);
+                        resolve(JSON.parse(xhr.responseText));
                     } else {
                         try {
                             const err = JSON.parse(xhr.responseText);
@@ -107,21 +121,59 @@ const Uploader = (() => {
                 });
 
                 xhr.addEventListener('error', () => reject(new Error('Network error')));
-
                 xhr.open('POST', '../api/pages.php');
                 xhr.send(formData);
             });
 
-            App.toast(`${validFiles.length} página(s) carregada(s)!`, 'success');
+            App.toast(`${filesToUpload.length} página(s) sincronizada(s)!`, 'success');
             App.refreshProject();
         } catch (err) {
-            App.toast('Erro no upload: ' + err.message, 'error');
+            console.error(err);
+            App.toast('Erro no processamento/upload: ' + err.message, 'error');
         } finally {
+            uploadText.innerHTML = originalText;
             setTimeout(() => {
                 progressBar.classList.remove('active');
                 progressFill.style.width = '0%';
             }, 1000);
         }
+    }
+
+    /**
+     * Converts a PDF file into an array of Image Blobs
+     */
+    async function convertPdfToImages(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pageImages = [];
+        
+        const progressFill = $('#progress-fill');
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            // Update progress during conversion
+            const pct = Math.round((i / pdf.numPages) * 100);
+            progressFill.style.width = pct + '%';
+
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2.0 }); // High quality
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+            
+            // Add metadata to blob for identification
+            const safeName = file.name.replace(/\.[^/.]+$/, "");
+            blob.name = `${safeName}-p${i}.jpg`;
+            
+            pageImages.push(blob);
+        }
+        
+        return pageImages;
     }
 
     // Auto-init when DOM ready
